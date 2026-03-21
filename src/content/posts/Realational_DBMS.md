@@ -1,3 +1,12 @@
+---
+title: "Relational vs NoSQL: When Tables Stopped Being Enough"
+published: 2026-03-21
+description: "Understanding the evolution from relational databases to NoSQL systems"
+tags: ["DBMS", "Database", "NoSQL"]
+category: Database Systems
+draft: false
+---
+
 ## When Tables Stopped Being Enough
 
 ### The Library Metaphor
@@ -9,6 +18,7 @@ Now imagine **Facebook launches**. A billion people arrive. Each user has differ
 That's when the library metaphor breaks down. The rigid shelves of the relational database can't keep up with the chaotic influx of data. You need a new kind of system that can handle this diversity and scale, that's where NoSQL comes in.
 
 Take away
+
 - SQL = good for neat, fixed data
 - Huge apps like Facebook = messy, fast-changing data → harder for SQL to handle
 
