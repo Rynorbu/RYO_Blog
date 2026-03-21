@@ -22,8 +22,6 @@ Take away
 - SQL = good for neat, fixed data
 - Huge apps like Facebook = messy, fast-changing data → harder for SQL to handle
 
----
-
 ### Why NoSQL Emerged
 
 > "NoSQL didn't arrive to replace the relational database. It arrived because some problems are shaped nothing like a table."
