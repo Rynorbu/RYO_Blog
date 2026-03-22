@@ -2,7 +2,7 @@
 
 [Astro](https://astro.build)로 구축된 정적 블로그 템플릿입니다.
 
-[**🖥️미리보기 (Vercel)**](https://fuwari.vercel.app)&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;
+[**🖥️미리보기 (Netlify)**](https://ryo11blog.netlify.app)&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;
 [**📦Old Hexo Version**](https://github.com/saicaca/hexo-theme-vivia)
 
 > README 버전: `2024-04-07`

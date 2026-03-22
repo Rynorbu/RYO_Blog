@@ -2,7 +2,7 @@
 
 แม่แบบสำหรับเว็บบล็อกแบบ static สร้างด้วย [Astro](https://astro.build)
 
-[**🖥️ ตัวอย่างการใช้งานจริง (Vercel)**](https://fuwari.vercel.app)&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;
+[**🖥️ ตัวอย่างการใช้งานจริง (Netlify)**](https://ryo11blog.netlify.app)&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;
 [**📦 เวอร์ชั่นเก่าสำหรับ Hexo**](https://github.com/saicaca/hexo-theme-vivia)
 
 > เวอร์ชั่นของ README: `2024-09-10`
