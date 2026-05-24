@@ -3,7 +3,7 @@ title: "Jenkins"
 published: 2026-03-06
 description: "Core concepts about Jenkins, CI/CD, and automation in software development."
 # image: "../../assets/images/my_photo.jpg"
-tags: ["Jenkins", "CI/CD", "DevOps", "Automation", "Pipeline", "DSO101"]
+tags: ["Jenkins", "CI-CD", "DevOps", "Automation", "Pipeline", "DSO101"]
 category: DevOps
 draft: false
 ---
