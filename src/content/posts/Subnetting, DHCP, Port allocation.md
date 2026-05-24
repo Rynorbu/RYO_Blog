@@ -3,7 +3,7 @@ title: "Subnetting, DHCP, and Port Allocation"
 published: 2026-03-06
 description: "Comprehensive guide to subnetting, DHCP, and port allocation in networking."
 # image: "../../assets/images/my_photo.jpg"
-tags: ["Networking", "Subnetting", "DHCP", "Ports", "TCP/IP", "DevOps", "DSO101"]
+tags: ["Networking", "Subnetting", "DHCP", "Ports", "TCP-IP", "DevOps", "DSO101"]
 category: DevOps
 draft: false
 ---

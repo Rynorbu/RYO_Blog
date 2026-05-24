@@ -3,7 +3,7 @@ title: "Networking in Linux"
 published: 2026-03-06
 description: "Core concepts about networking in Linux and how it works."
 # image: "../../assets/images/my_photo.jpg"
-tags: ["Linux", "Networking", "DevOps", "TCP/IP", "DSO101"]
+tags: ["Linux", "Networking", "DevOps", "TCP-IP", "DSO101"]
 category: DevOps
 draft: false
 ---
