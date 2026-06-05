@@ -323,7 +323,7 @@ chown alice:dev file.txt
 
 # Change recursively
 chown -R alice:dev /path/to/directory
-chgrp -R dev /path/to/directory
+chgrp -R dev /path/to/directory 
 ```
 
 ## Common Permission Patterns
