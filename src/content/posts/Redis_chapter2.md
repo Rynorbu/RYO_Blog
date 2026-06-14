@@ -8,12 +8,9 @@ category: Redis
 draft: false
 ---
 
-# Unit II: Key-Value Databases — Redis
+# Unit II: Key-Value Databases: Redis
+
 ### DBS302 · NoSQL Database Systems · BE Software Engineering
-
-> **How to use these notes:** Each section builds on the previous one. If you're new to Redis, read from 2.1 to 2.8 in order. If you're reviewing, jump to any section using the table of contents.
-
----
 
 ## Table of Contents
 
@@ -34,9 +31,9 @@ draft: false
 
 ### 2.1.1 Concept and Architecture
 
-A **key-value database** stores data as pairs of a unique key and its associated value — exactly like a `dict` in Python or a `HashMap` in Java.
+A **key-value database** stores data as pairs of a unique key and its associated value, exactly like a `dict` in Python or a `HashMap` in Java.
 
-> 🔑 **Analogy — Gym Locker Room:** Each locker has a unique number (the **KEY**) and whatever you put inside is the **VALUE**. If you know the locker number, you get your stuff instantly — no searching through every locker. That's O(1) lookup.
+> **Analogy: Gym Locker Room:** Each locker has a unique number (the **KEY**) and whatever we put inside is the **VALUE**. If we know the locker number, we get our stuff instantly, no searching through every locker. That's O(1) lookup.
 
 ```
 KEY                           VALUE
@@ -51,15 +48,15 @@ leaderboard              →    [sorted list of players]
 
 | Pillar | What it means |
 |--------|--------------|
-| **In-Memory Storage** | All data lives in RAM — no disk reads, sub-millisecond access |
+| **In-Memory Storage** | All data lives in RAM, no disk reads, sub-millisecond access |
 | **Non-Blocking I/O** | Uses the *Reactor Pattern* with `epoll`/`kqueue` to handle thousands of connections on a single thread |
 | **Single-Threaded Execution** | No context switching, no mutex locks, no race conditions |
 
-**The Reactor Pattern** is the heart of Redis — it's an event-driven design where an *I/O multiplexer* monitors all client connections and dispatches events one by one to a single worker thread. The CPU never waits for slow I/O; it only works when data is actually ready.
+**The Reactor Pattern** is the heart of Redis: it's an event-driven design where an *I/O multiplexer* monitors all client connections and dispatches events one by one to a single worker thread. The CPU never waits for slow I/O; it only works when data is actually ready.
 
 > **Why is single-threaded fast?** Because there are no context switches, no lock contention, and the CPU cache stays "warm." Redis processes 100,000+ requests/second on a single core.
 
-**How RESP fits in:** Clients communicate with Redis using **RESP (REdis Serialization Protocol)** — a binary-safe, text-based protocol. While the Reactor Pattern is the *engine*, RESP is the *language* spoken over connections.
+**How RESP fits in:** Clients communicate with Redis using **RESP (REdis Serialization Protocol)** a binary-safe, text-based protocol. While the Reactor Pattern is the *engine*, RESP is the *language* spoken over connections.
 
 ---
 
@@ -70,11 +67,11 @@ leaderboard              →    [sorted list of players]
 | Advantage | Why It Matters |
 |-----------|----------------|
 | **Blazing Fast** | In-memory = no disk I/O. O(1) for most operations. 1M+ ops/sec |
-| **Simple Model** | No schemas, no JOINs — store and retrieve with minimal complexity |
+| **Simple Model** | No schemas, no JOINs, store and retrieve with minimal complexity |
 | **Horizontally Scalable** | Redis Cluster distributes data across nodes |
 | **Flexible Data Types** | 10+ types: strings, lists, sets, hashes, sorted sets, geo, HLL, and more |
-| **Atomic Operations** | `INCR` is atomic — safe for concurrent counters without locks |
-| **TTL Support** | Keys auto-expire — perfect for sessions, caches, rate limits |
+| **Atomic Operations** | `INCR` is atomic, safe for concurrent counters without locks |
+| **TTL Support** | Keys auto-expire, perfect for sessions, caches, rate limits |
 
 **Limitations:**
 
@@ -86,7 +83,7 @@ leaderboard              →    [sorted list of players]
 | **Key-Based Lookup Only** | Scanning all keys is O(N) and dangerous in production |
 | **Persistence Complexity** | In-memory data risks loss without careful configuration |
 
-> ⚠️ **Key Insight:** Redis is **not a replacement** for PostgreSQL or MySQL. It's a **complement** — use it for caching, sessions, queues, and leaderboards *alongside* a persistent relational database.
+> **Key Insight:** Redis is **not a replacement** for PostgreSQL or MySQL. It's a **complement** use it for caching, sessions, queues, and leaderboards *alongside* a persistent relational database.
 
 ---
 
@@ -104,7 +101,7 @@ leaderboard              →    [sorted list of players]
 | **Geolocation** | Find nearby drivers, restaurants, stores | Uber, Swiggy, Zomato |
 | **Distributed Locks** | Prevent race conditions across servers | Payment processing |
 
-> 🛒 **Real-World Example — Amazon Cart:** When you add an item to your Amazon cart, it's stored in Redis as `cart:user:9876`. It's faster than querying a database on every page load and expires automatically after 30 days of inactivity.
+> **Real-World Example: Amazon Cart:** When you add an item to your Amazon cart, it's stored in Redis as `cart:user:9876`. It's faster than querying a database on every page load and expires automatically after 30 days of inactivity.
 
 ---
 
@@ -112,7 +109,7 @@ leaderboard              →    [sorted list of players]
 
 ### 2.2.1 Redis Data Model
 
-Redis stores everything in a **flat key-value namespace** — no tables, no rows, no foreign keys. Since all keys share the same space, **structured naming is critical.**
+Redis stores everything in a **flat key-value namespace** no tables, no rows, no foreign keys. Since all keys share the same space, **structured naming is critical.**
 
 **Key Naming Convention:** `object-type:id:attribute`
 
@@ -124,7 +121,7 @@ cache:homepage:trending     # Cached content
 ratelimit:user:1001:api     # Rate limiting counter
 ```
 
-> 💡 **Tip:** Use colons (`:`) as separators consistently. This lets you safely iterate with `SCAN 0 MATCH user:*` in production without blocking.
+> **Tip:** Use colons (`:`) as separators consistently. This lets you safely iterate with `SCAN 0 MATCH user:*` in production without blocking.
 
 **Key Rules:**
 
@@ -159,13 +156,13 @@ TTL session:tok123                       # Returns remaining seconds
 PERSIST username                         # Remove expiry
 ```
 
-> 🐦 **Real-World — Twitter Rate Limiting:** `SET ratelimit:user:1001:tweets 0` → `INCR` on each tweet → `EXPIRE` for 3 hours → reject when value hits 300.
+> **Real-World: Twitter Rate Limiting:** `SET ratelimit:user:1001:tweets 0` → `INCR` on each tweet → `EXPIRE` for 3 hours → reject when value hits 300.
 
 ---
 
 #### 2. Lists
 
-An ordered list of strings — a doubly linked list under the hood. Perfect for **queues** (LPUSH + RPOP) and **stacks** (LPUSH + LPOP).
+An ordered list of strings, a doubly linked list under the hood. Perfect for **queues** (LPUSH + RPOP) and **stacks** (LPUSH + LPOP).
 
 ```bash
 LPUSH tasks "send_email"        # ["send_email"]
@@ -176,10 +173,10 @@ LRANGE tasks 0 -1               # Get ALL elements
 LPOP tasks                      # Remove from left
 RPOP tasks                      # Remove from right
 
-BLPOP tasks 30     # ⭐ BLOCKING pop — waits up to 30s for a new task
+BLPOP tasks 30     # BLOCKING pop — waits up to 30s for a new task
 ```
 
-> 📸 **Real-World — Instagram Task Queue:** When a user uploads a photo, a job is pushed to a Redis list. Worker processes use `BLPOP` to pick up and process jobs (resize, notify) without polling.
+> **Real-World: Instagram Task Queue:** When a user uploads a photo, a job is pushed to a Redis list. Worker processes use `BLPOP` to pick up and process jobs (resize, notify) without polling.
 
 ---
 
@@ -202,13 +199,13 @@ SUNION tags:article:101 tags:article:102   # → all unique tags
 SDIFF  tags:article:101 tags:article:102   # → {"nosql","database"}
 ```
 
-> 🤝 **Real-World — LinkedIn "People You May Know":** `SINTER connections:alice connections:bob` returns users known by both — perfect mutual connection suggestions.
+> **Real-World: LinkedIn "People You May Know":** `SINTER connections:alice connections:bob` returns users known by both, perfect mutual connection suggestions.
 
 ---
 
 #### 4. Hashes
 
-A **field-value map** stored under a single key — like a mini dictionary, or a single database row. Best for storing objects.
+A **field-value map** stored under a single key, like a mini dictionary, or a single database row. Best for storing objects.
 
 ```bash
 HSET user:1001 name "Alice" email "alice@example.com" age 28 city "Thimphu"
@@ -227,7 +224,7 @@ HDEL  user:1001 city          # Delete one field
 | `SET user:1001 '{"name":"Alice","age":28}'` | To update age: read → deserialize → update → serialize → write the entire object |
 | `HSET user:1001 name "Alice" age 28` | Update just one field: `HSET user:1001 age 29` — no touching other fields |
 
-> 🐙 **Real-World — GitHub Repos:** `HSET repo:torvalds/linux stars 170000 forks 49000 language "C"` — fetched with `HGETALL` in microseconds on page load.
+> **Real-World: GitHub Repos:** `HSET repo:torvalds/linux stars 170000 forks 49000 language "C"`, fetched with `HGETALL` in microseconds on page load.
 
 ---
 
@@ -254,7 +251,7 @@ ZCOUNT leaderboard 4500 +inf          # Count with score >= 4500
 ZPOPMIN leaderboard                   # Remove and return lowest scorer
 ```
 
-> 🏆 **Real-World — Stack Overflow:** `ZREVRANGE reputations 0 99 WITHSCORES` — fetches the top 100 users for the "Top Users" page in real-time. No SQL sorting needed.
+> **Real-World: Stack Overflow:** `ZREVRANGE reputations 0 99 WITHSCORES`, fetches the top 100 users for the "Top Users" page in real-time. No SQL sorting needed.
 
 ---
 
@@ -271,11 +268,11 @@ TTL    user:1001         # Remaining TTL (-1 = no TTL, -2 = not found)
 PERSIST user:1001        # Remove TTL (make permanent)
 
 # Safe key iteration:
-SCAN 0 MATCH user:* COUNT 100   # ✅ Use this
-KEYS user:*                      # ❌ NEVER in production — O(N) blocking
+SCAN 0 MATCH user:* COUNT 100   # Use this
+KEYS user:*                      # NEVER in production: O(N) blocking
 ```
 
-> ⚠️ **NEVER use `KEYS *` in production!** It's O(N) and blocks ALL other Redis operations while scanning. Use `SCAN` instead — it iterates in small batches without blocking.
+> **NEVER use `KEYS *` in production!** It's O(N) and blocks ALL other Redis operations while scanning. Use `SCAN` instead, it iterates in small batches without blocking.
 
 **Server Commands:**
 
@@ -285,7 +282,7 @@ INFO memory       # Memory-specific stats
 DBSIZE            # Total key count
 SLOWLOG GET 10    # Last 10 slow commands
 CONFIG SET maxmemory 2gb   # Live config update (no restart!)
-FLUSHDB           # ⚠️ Delete ALL keys in current DB
+FLUSHDB           # Delete ALL keys in current DB
 ```
 
 ---
@@ -302,7 +299,7 @@ FLUSHDB           # ⚠️ Delete ALL keys in current DB
 
 A Redis **Bitmap** is not a separate type — it's a set of bit manipulation operations on regular Redis Strings. Each string character = 8 bits = 8 boolean flags.
 
-> 🎬 **Analogy — Cinema Seating:** Imagine each seat = one user ID. A `1` bit means "occupied/active", `0` means "empty/inactive". You can represent the status of 8 users in a single byte.
+> **Analogy: Cinema Seating:** Imagine each seat = one user ID. A `1` bit means "occupied/active", `0` means "empty/inactive". You can represent the status of 8 users in a single byte.
 
 ```bash
 # Track which users logged in on a specific date:
@@ -326,7 +323,7 @@ BITCOUNT active_both              # Intersection count
 | Bitmap | ~1.25 MB | 1 bit per user |
 | **Savings** | **80x smaller** | |
 
-> 🐙 **Real-World — GitHub Contribution Graph:** Those green squares on GitHub profiles? Each bit = one day. `BITCOUNT contributions:user:torvalds` = total active days.
+> **Real-World: GitHub Contribution Graph:** Those green squares on GitHub profiles? Each bit = one day. `BITCOUNT contributions:user:torvalds` = total active days.
 
 ---
 
@@ -353,7 +350,7 @@ BITFIELD player:1001 OVERFLOW SAT INCRBY u8 8 200   # Health stays at 255
 
 **The Problem:** You need to count unique visitors. Storing every visitor ID in a Set costs ~48 GB for 1 billion users.
 
-**HyperLogLog (HLL)** is a probabilistic algorithm that estimates the count of distinct elements using **constant, tiny memory — always ~12 KB**, regardless of input size. The trade-off: ~0.81% error rate (acceptable for analytics).
+**HyperLogLog (HLL)** is a probabilistic algorithm that estimates the count of distinct elements using **constant, tiny memory, always ~12 KB**, regardless of input size. The trade-off: ~0.81% error rate (acceptable for analytics).
 
 **How it works (intuition):** HLL hashes each input into a binary string and tracks the maximum number of leading zeros seen. Statistically, if the longest run of leading zeros is `k`, then approximately `2^k` distinct items have been seen. With 16,384 sub-registers averaging these observations, the estimate becomes remarkably accurate.
 
@@ -382,7 +379,7 @@ PFCOUNT visitors:week   # → ~7 unique users across all 3 days
 | Redis Set | ~48 GB | 100% exact |
 | HyperLogLog | ~12 KB | ~99.19% |
 
-> 📺 **Real-World — YouTube:** "500 million unique views" is an approximation using HLL-like structures. At that scale, ±0.81% error is unnoticeable and saves enormous memory.
+> **Real-World: YouTube:** "500 million unique views" is an approximation using HLL-like structures. At that scale, ±0.81% error is unnoticeable and saves enormous memory.
 
 ---
 
@@ -392,10 +389,10 @@ PFCOUNT visitors:week   # → ~7 unique users across all 3 days
 
 A **Bloom Filter** answers: *"Is this element possibly in the set?"*
 
-- **"NO"** → **definitely not** in the set (100% accurate — zero false negatives)
-- **"YES"** → **probably** in the set (small chance of false positive)
+- **"NO"** - **definitely not** in the set (100% accurate, zero false negatives)
+- **"YES"** - **probably** in the set (small chance of false positive)
 
-**How it works:** A bit array + multiple hash functions. Adding an item sets several bits to 1. Checking an item verifies all those bits — if any is 0, the item is definitely absent; if all are 1, it's probably present.
+**How it works:** A bit array + multiple hash functions. Adding an item sets several bits to 1. Checking an item verifies all those bits, if any is 0, the item is definitely absent; if all are 1, it's probably present.
 
 ```bash
 # Requires RedisBloom module (included in Redis Stack)
@@ -408,13 +405,13 @@ BF.ADD urls:shortened "https://google.com"
 BF.ADD urls:shortened "https://github.com"
 
 # Check membership:
-BF.EXISTS urls:shortened "https://google.com"   # → 1 (probably in set)
-BF.EXISTS urls:shortened "https://bing.com"     # → 0 (DEFINITELY not)
+BF.EXISTS urls:shortened "https://google.com"   # 1 (probably in set)
+BF.EXISTS urls:shortened "https://bing.com"     # 0 (DEFINITELY not)
 
 # Bulk operations:
 BF.MADD blacklist:emails "spam@evil.com" "bot@scam.net"
 BF.MEXISTS blacklist:emails "spam@evil.com" "real@gmail.com"
-# → [1, 0]
+# [1, 0]
 ```
 
 **Two-tier lookup pattern:**
@@ -433,9 +430,10 @@ Not Present           │        │
                     (TP)     (FP → discard)
 ```
 
-> 🌐 **Real-World — Google Chrome Safe Browsing:** Chrome stores a local Bloom Filter of known malicious URLs. `0` = definitely safe (no network call needed). `1` = send to Google for exact verification. This reduces network calls by ~99%.
+> **Real-World: Google Chrome Safe Browsing:** Chrome stores a local Bloom Filter of known malicious URLs. `0` = definitely safe (no network call needed). `1` = send to Google for exact verification. This reduces network calls by ~99%.
 
 **Important Limitations:**
+
 - Cannot **delete** items (only add). Use a **Cuckoo Filter** if deletion is needed.
 - False positive rate **increases** as the filter fills beyond capacity.
 - Not suitable when exact membership is required (billing, auth).
@@ -444,9 +442,9 @@ Not Present           │        │
 
 ### 2.3.4 Geospatial Indexes
 
-Redis Geospatial commands are built **on top of Sorted Sets** — coordinates are encoded as GeoHash integers (scores), enabling efficient proximity queries.
+Redis Geospatial commands are built **on top of Sorted Sets**, coordinates are encoded as GeoHash integers (scores), enabling efficient proximity queries.
 
-> 📍 **GeoHash:** An algorithm that encodes `(latitude, longitude)` into a single string or integer. Nearby coordinates share similar GeoHash prefixes — this "spatial locality" enables fast range queries.
+> **GeoHash:** An algorithm that encodes `(latitude, longitude)` into a single string or integer. Nearby coordinates share similar GeoHash prefixes, this "spatial locality" enables fast range queries.
 
 ```bash
 # Add driver locations (longitude first, then latitude):
@@ -460,7 +458,7 @@ GEOPOS drivers:online driver_A
 # Distance between two points:
 GEODIST drivers:online driver_A driver_B km   # → 1.78 km
 
-# ⭐ Find all drivers within 3 km of a passenger:
+# Find all drivers within 3 km of a passenger:
 GEOSEARCH drivers:online
     FROMLONLAT 77.2090 28.6139
     BYRADIUS 3 km
@@ -484,7 +482,7 @@ GEOHASH drivers:online driver_A driver_B
 | `GEOSEARCH key FROMLONLAT ...` | Radius/bounding box search |
 | `GEOHASH key member` | Get GeoHash string |
 
-> 🛵 **Real-World — Swiggy/Zomato:** On app open: `GEOSEARCH restaurants FROMLONLAT <your_lat> <your_lon> BYRADIUS 5 km ASC` — returns all restaurants within 5 km, sorted by proximity, in sub-millisecond time.
+> **Real-World — Swiggy/Zomato:** On app open: `GEOSEARCH restaurants FROMLONLAT <your_lat> <your_lon> BYRADIUS 5 km ASC`, returns all restaurants within 5 km, sorted by proximity, in sub-millisecond time.
 
 **Performance:** ~16 bytes per member, ~0.6mm precision, O(log N) for GEOADD, O(N + log M) for radius search.
 
@@ -504,13 +502,13 @@ GEOHASH drivers:online driver_A driver_B
 
 ## 2.4 Redis Persistence and Durability
 
-> Redis is in-memory. A crash or restart clears all data — like RAM being wiped on shutdown. Persistence mechanisms save data to disk so it can be recovered.
+> Redis is in-memory. A crash or restart clears all data, like RAM being wiped on shutdown. Persistence mechanisms save data to disk so it can be recovered.
 
 ---
 
 ### 2.4.1 RDB Snapshots (Redis Database Backup)
 
-RDB creates **point-in-time binary snapshots** of the entire dataset at configured intervals. Uses OS `fork()` + Copy-On-Write — so the main process keeps serving clients while a child process writes the snapshot.
+RDB creates **point-in-time binary snapshots** of the entire dataset at configured intervals. Uses OS `fork()` + Copy-On-Write, so the main process keeps serving clients while a child process writes the snapshot.
 
 ```bash
 # redis.conf:
@@ -521,8 +519,8 @@ dbfilename dump.rdb
 dir /var/lib/redis/
 
 # Manual commands:
-BGSAVE      # ✅ Background save (non-blocking)
-SAVE        # ⚠️ Synchronous save (BLOCKS Redis)
+BGSAVE      # Background save (non-blocking)
+SAVE        # Synchronous save (BLOCKS Redis)
 LASTSAVE    # Unix timestamp of last successful save
 ```
 
@@ -538,7 +536,7 @@ LASTSAVE    # Unix timestamp of last successful save
 
 ### 2.4.2 AOF (Append-Only File) Logs
 
-AOF **logs every write operation** to a file in RESP format. On restart, Redis replays all commands to rebuild the dataset — like a transaction log in RDBMS.
+AOF **logs every write operation** to a file in RESP format. On restart, Redis replays all commands to rebuild the dataset, like a transaction log in RDBMS.
 
 ```bash
 # redis.conf:
@@ -547,7 +545,7 @@ appendfilename "appendonly.aof"
 
 # Fsync policy (when to flush buffer to disk):
 appendfsync always    # Every write → MOST DURABLE, slowest
-appendfsync everysec  # Every second → BALANCED ⭐ recommended
+appendfsync everysec  # Every second → BALANCED recommended
 appendfsync no        # Let OS decide → FASTEST, least durable
 
 # Auto-rewrite (compress AOF when it grows too large):
@@ -559,6 +557,7 @@ BGREWRITEAOF
 ```
 
 What the AOF file looks like (human-readable RESP format):
+
 ```
 *3          ← Command has 3 arguments
 $3          ← Next arg: 3 bytes
@@ -578,10 +577,10 @@ Alice
 | No persistence | Total loss | Instant | Pure cache, data rebuildable |
 | RDB only | Up to minutes | Fast | Tolerable loss, backups |
 | AOF only | ≤1 second | Slower | High-durability requirement |
-| **RDB + AOF** | **≤1 second** | **Fast (uses RDB)** | **⭐ Production recommended** |
+| **RDB + AOF** | **≤1 second** | **Fast (uses RDB)** | **Production recommended** |
 
 ```bash
-# redis.conf — Production Hybrid Setup:
+# redis.conf, Production Hybrid Setup:
 appendonly yes
 appendfsync everysec
 auto-aof-rewrite-percentage 100
@@ -591,13 +590,14 @@ save 300 10
 aof-use-rdb-preamble yes    # Redis 7.0+ hybrid mode
 ```
 
-> 🛍️ **Real-World — Shopify on Black Friday:** AOF `everysec` ensures cart data loses at most 1 second during outages. Daily RDB snapshots go to AWS S3 for disaster recovery. During peak traffic (millions of transactions/minute), this balance is critical.
+> **Real-World — Shopify on Black Friday:** AOF `everysec` ensures cart data loses at most 1 second during outages. Daily RDB snapshots go to AWS S3 for disaster recovery. During peak traffic (millions of transactions/minute), this balance is critical.
 
 ---
 
 ## 2.5 Redis Clustering and High Availability
 
 > **Key Terms:**
+>
 > - **SPOF (Single Point of Failure):** If one server fails, the whole service goes down.
 > - **High Availability (HA):** The system keeps working even if some nodes fail.
 > - **Horizontal Scaling:** Adding more machines, not bigger machines.
@@ -621,13 +621,14 @@ redis-sentinel /etc/redis/sentinel.conf
 ```
 
 **Sentinel Failover Flow:**
+
 1. Primary stops responding → Sentinels detect failure
 2. Quorum reached (e.g., 2 of 3 sentinels agree)
 3. Sentinel promotes a replica: `SLAVEOF NO ONE`
 4. Sentinels notify clients about the new primary
 5. Other replicas reconfigure to follow the new primary
 
-> ⚠️ **Sentinel vs Cluster:** Sentinel solves **High Availability** (auto-failover) but NOT horizontal scaling. To scale writes beyond one machine, use Redis Cluster.
+> **Sentinel vs Cluster:** Sentinel solves **High Availability** (auto-failover) but NOT horizontal scaling. To scale writes beyond one machine, use Redis Cluster.
 
 ---
 
@@ -675,7 +676,7 @@ redis-cli --cluster create \
 | Multi-key ops | Full support | Keys must share hash slot |
 | Minimum nodes | 3 (1P + 2 Sentinels) | 6 (3M + 3R) |
 
-> 📸 **Real-World — Instagram:** Uses Redis Cluster across thousands of nodes to store follower/following relationships and feed data for 1+ billion users. No single machine could hold all this in RAM.
+> **Real-World: Instagram:** Uses Redis Cluster across thousands of nodes to store follower/following relationships and feed data for 1+ billion users. No single machine could hold all this in RAM.
 
 ---
 
@@ -697,6 +698,7 @@ INFO replication
 ```
 
 **Full Sync Process:**
+
 1. Replica sends `PSYNC ? -1` (full sync request)
 2. Primary forks and creates an RDB snapshot (`BGSAVE`)
 3. Primary sends RDB file to replica
@@ -720,7 +722,7 @@ Redis Modules (since Redis 4.0) extend Redis with new data types and commands. *
 
 ---
 
-### 2.6.1 RediSearch — Full-Text Search
+### 2.6.1 RediSearch: Full-Text Search
 
 RediSearch transforms Redis into a search engine with inverted indexes for O(1)/O(log N) queries instead of O(N) key scans.
 
@@ -757,15 +759,16 @@ FT.SEARCH idx:products "*" SORTBY price ASC LIMIT 0 10
 | `NUMERIC` | Range-based math queries | Prices, timestamps |
 
 **Key Design Insights:**
-- The index is **decoupled from the data** — deleting the index doesn't delete the Hash data.
-- Data is added via standard `HSET` — RediSearch monitors the prefix and auto-indexes.
+
+- The index is **decoupled from the data**: deleting the index doesn't delete the Hash data.
+- Data is added via standard `HSET`, RediSearch monitors the prefix and auto-indexes.
 - Instead of O(N) key scans, RediSearch uses an **Inverted Index** for O(1)/O(log N) lookups.
 
 ---
 
-### 2.6.2 RedisJSON — Native JSON Storage
+### 2.6.2 RedisJSON: Native JSON Storage
 
-Store, retrieve, and partially update JSON documents natively — no full serialization/deserialization required.
+Store, retrieve, and partially update JSON documents natively, no full serialization/deserialization required.
 
 ```bash
 # Store JSON:
@@ -796,7 +799,7 @@ JSON.ARRLEN    user:1001 $.skills      # → 3
 
 ---
 
-### 2.6.3 RedisTimeSeries — Time-Series Data
+### 2.6.3 RedisTimeSeries: Time-Series Data
 
 Built for storing and querying sequential timestamped data with automatic aggregation and downsampling.
 
@@ -819,13 +822,13 @@ TS.CREATERULE temperature:sensor:001 temp:hourly:001
   AGGREGATION avg 3600000   # Auto-compute hourly averages
 ```
 
-> 🚗 **Real-World — Tesla Telemetry:** Every Tesla sends battery level, temperature, speed, and GPS every second. RedisTimeSeries stores this with automatic aggregation (per-minute averages), enabling real-time dashboards and anomaly detection.
+> **Real-World: Tesla Telemetry:** Every Tesla sends battery level, temperature, speed, and GPS every second. RedisTimeSeries stores this with automatic aggregation (per-minute averages), enabling real-time dashboards and anomaly detection.
 
 ---
 
-### 2.6.4 RedisAI — ML Model Serving
+### 2.6.4 RedisAI, ML Model Serving
 
-Serve machine learning models directly inside Redis — no data transfer to a separate inference server.
+Serve machine learning models directly inside Redis, no data transfer to a separate inference server.
 
 ```bash
 # Load a trained TensorFlow model:
@@ -847,7 +850,7 @@ AI.TENSORGET output:sentiment VALUES
 # → [0.92]  (92% positive sentiment)
 ```
 
-The key advantage: User data is already in Redis. The model is also in Redis. Inference happens in one hop — no network transfer to a separate ML server.
+The key advantage: User data is already in Redis. The model is also in Redis. Inference happens in one hop, no network transfer to a separate ML server.
 
 ---
 
@@ -873,7 +876,7 @@ for i in range(10000):
 results = pipe.execute()                  # Send ALL at once
 ```
 
-> `transaction=False` disables `MULTI/EXEC` wrapping — commands are buffered and sent together but are **not atomic**. This is appropriate for bulk inserts where atomicity isn't needed.
+> `transaction=False` disables `MULTI/EXEC` wrapping, commands are buffered and sent together but are **not atomic**. This is appropriate for bulk inserts where atomicity isn't needed.
 
 ---
 
@@ -894,7 +897,7 @@ DECRBY user:1001:credits 100
 EXEC   # Returns nil if key changed since WATCH → retry!
 ```
 
-> ⚠️ **Redis ≠ SQL Transactions.** Redis does NOT roll back on runtime errors. If command 3 of 5 fails, commands 1, 2, 4, 5 still execute. `MULTI/EXEC` only guarantees no interleaving between other clients.
+> **Redis ≠ SQL Transactions.** Redis does NOT roll back on runtime errors. If command 3 of 5 fails, commands 1, 2, 4, 5 still execute. `MULTI/EXEC` only guarantees no interleaving between other clients.
 
 ---
 
@@ -913,7 +916,7 @@ EVAL "
 " 1 user:1001:credits 100
 ```
 
-Lua scripts run atomically — no other commands can interleave during execution.
+Lua scripts run atomically, no other commands can interleave during execution.
 
 ---
 
@@ -930,7 +933,7 @@ maxmemory-policy allkeys-lru
 | Policy | Behavior | Best For |
 |--------|----------|----------|
 | `noeviction` | Error when full (default) | Data that must never be lost |
-| `allkeys-lru` | Evict Least Recently Used from all keys | ⭐ General cache |
+| `allkeys-lru` | Evict Least Recently Used from all keys | General cache |
 | `volatile-lru` | LRU from keys with TTL only | Mixed permanent + cached |
 | `allkeys-lfu` | Evict Least Frequently Used from all keys | Frequency matters more than recency |
 | `volatile-lfu` | LFU from TTL keys only | Frequently accessed cache |
@@ -949,7 +952,7 @@ MEMORY DOCTOR              # Auto-diagnosis and suggestions
 # maxmemory_human           → configured limit
 ```
 
-> 💡 **Pro Tip — Hash for Small Objects:** Redis uses compact `listpack` encoding for hashes with fewer than 128 fields and values under 64 bytes. Storing 1M user objects as hashes can be 10x more memory-efficient than using separate string keys.
+> **Pro Tip: Hash for Small Objects:** Redis uses compact `listpack` encoding for hashes with fewer than 128 fields and values under 64 bytes. Storing 1M user objects as hashes can be 10x more memory-efficient than using separate string keys.
 
 ---
 
@@ -987,7 +990,7 @@ MONITOR            # Real-time command stream (dev/debug only!)
 
 ## 2.8 Redis Security Considerations
 
-> ⚠️ **Critical Context:** Redis was originally designed for trusted internal networks. By default — **NO authentication**, listens on all interfaces. In 2016, tens of thousands of unprotected Redis instances were compromised. Security is not optional.
+> **Critical Context:** Redis was originally designed for trusted internal networks. By default, **NO authentication**, listens on all interfaces. In 2016, tens of thousands of unprotected Redis instances were compromised. Security is not optional.
 
 ---
 
@@ -1005,7 +1008,7 @@ redis-cli -a YourStr0ngP@ssw0rd!
 AUTH YourStr0ngP@ssw0rd!
 ```
 
-#### ACL — Access Control Lists (Redis 6.0+)
+#### ACL: Access Control Lists (Redis 6.0+)
 
 Modern, fine-grained access control — define what each user can do and on which keys.
 
@@ -1095,7 +1098,7 @@ maxmemory-policy allkeys-lru
 | Audit | ACL LOG, slow log | Detecting attacks, compliance |
 | Command hardening | Rename/disable dangerous commands | Accidental/malicious data wipes |
 
-> 🔴 **Real Security Incident — The Crackit Attack (2016):** Attackers found Redis instances exposed to the internet with no auth. They used `CONFIG SET dir /root/.ssh`, `CONFIG SET dbfilename authorized_keys`, then `SET` to write their SSH key — gaining full root server access. **Always firewall your Redis port. Always use ACL.**
+> **Real Security Incident: The Crackit Attack (2016):** Attackers found Redis instances exposed to the internet with no auth. They used `CONFIG SET dir /root/.ssh`, `CONFIG SET dbfilename authorized_keys`, then `SET` to write their SSH key, gaining full root server access. **Always firewall your Redis port. Always use ACL.**
 
 ---
 
@@ -1147,8 +1150,8 @@ BF.ADD key item        BF.EXISTS key item
 | HSET / HGET | O(1) | Hash table |
 | ZADD / ZSCORE / ZRANK | O(log N) | Skip list |
 | ZRANGE | O(log N + M) | M=elements returned |
-| KEYS * | O(N) | ❌ Blocks Redis |
-| SCAN | O(1) per call | ✅ Non-blocking |
+| KEYS * | O(N) | Blocks Redis |
+| SCAN | O(1) per call | Non-blocking |
 
 ### Data Type Decision Guide
 
@@ -1182,4 +1185,3 @@ BF.ADD key item        BF.EXISTS key item
 | Anti-pattern | Never `KEYS *`, never store huge values in Redis |
 
 ---
-
